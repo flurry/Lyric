@@ -3,73 +3,96 @@
  * Javascript Linear Regression implementation using the Sylvester (Vector/Matrix) library.
  * 
  * Example usage:
- * var estimateData = applyModel(estimationRange, buildModel(data));
+ * var estimateData = applyModel(estimateInput, buildModel(data));
+ *
+ * Dependencies:
+ * sylvester.js - https://github.com/jcoglan/sylvester
+ * jquery.js - http://jquery.com
  * 
+ * @author Flurry, Inc. 
+ * Copyright 2012 Flurry, Inc. (http://flurry.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
-/* Runs a regression on the input and outputs 
+// Default degree for the model polynomials
+var DEFAULT_POLYNOMIAL_DEGREE = 2;
+
+/** Runs a regression on the input and outputs 
  * 
- * PARAMETERS:
- * 	data - A 2 dimensional array comprised of data[0] the explanatory and data[1] the dependent values
- * RETURN:
- *  A 1 dimensional array of the theta values, representing the coefficients of the predictive model
+ * 	@param data - A 2-dimensional array comprised of data[0] the explanatory and data[1] the dependent values
+ *  @param degree - (optional) The degree of the polynomial to use to model the data
+ *  @returns A 1-dimensional array of the theta values, representing the coefficients of the predictive model
  */
-function buildModel(data)
+function buildModel(data, degree)
 {
-	// take data series format {[x,y]} and turn it into vectors
-	var vectors = vectorize(data);
+	// if the degree is not provided, use the default
+	if(!degree) degree = DEFAULT_POLYNOMIAL_DEGREE;
 	
-	var X = generateInputMatrix(vectors["x"]);
-	var y = vectors["y"];
-
-	console.log("Input X");
-	console.log(JSON.stringify(X.dimensions()));
-	console.log(X.inspect());
-	console.log("Input y");
-	console.log(JSON.stringify(y.dimensions()));
+	// take data series format {[x,y]} and turn it into vectors
+	//var vectors = vectorize(data);
+	
+	var X = generateInputMatrix(data["x"], degree);
+	var y = $M(data["y"]);
 	
 	var theta = generateTheta(X, y);
-	
-	console.log("Theta");
-	console.log(JSON.stringify(theta.dimensions()));
-	console.log(theta.inspect());
 	
 	return theta;
 }
 
-// Applies a given model to a set of input values
-function applyModel(xSeries, theta)
+/** Applies a given model (theta) to a set of input values.
+ * 
+ * 	@param data - A 1-dimensional array comprised of the explanatory values to be estimated
+ *  @param theta - The model generated to fit the data (from buildModel())
+ *  @param degree - (optional) The degree of the polynomial to use to model the data
+ *  @returns A 1-dimensional array of the dependent predictions from the explanatory values
+ */
+function applyModel(data, theta, degree)
 { 
-	var x = ordinalize(xSeries);
-	console.log("x");
-	console.log(JSON.stringify(x.dimensions()));
+	// if the degree is not provided, use the default
+	if(!degree) degree = DEFAULT_POLYNOMIAL_DEGREE;
+
+	// turn the input into the same form we used for generating theta (or else this won't work)
+	var xMatrix = generateInputMatrix(data["x"], degree).transpose();
 	
-	var xMatrix = generateInputMatrix(x).transpose();
-	
+	// multiply by theta to get the predicted y values
 	var y = xMatrix.x(theta).transpose();
-	console.log("y");
-	console.log(JSON.stringify(y.dimensions()));
-	console.log(y.inspect());
 	
 	// combine x and y into a data series
 	var dataSeries = new Array();
-	for(i=0; i<x.cols(); i++)
+	for(i=0; i<data['x'].length; i++)
 	{
-		dataSeries[i] = {x : xSeries[i], y : y.e(1,i)};
+		if(data['label']) // if there are labels use them
+			dataSeries[i] = {x : data["label"][i], y : y.e(1,i)};
+		else			  // otherwise the x values are fine
+			dataSeries[i] = {x : data["x"][i], y : y.e(1,i)};
 	}
-
-	console.log("result");
-	console.log(JSON.stringify(dataSeries));
-	
 	
 	return dataSeries;
 }
 
-// Generates theta values using the Normal Equation
+/** Generates theta using the Normal Equation. Theta is a matrix of the coefficient values of the linear regression formula
+ * chosen to best match the input data.
+ * 
+ * The Normal Equation is represented in Octave as the following:
+ * theta = pinv(X'*X)*X'*y;
+ * 
+ * @param X An input array of explanatory values representing the x values of the equation
+ * @param y The dependent values that X should be determining
+ * @returns An array of size X[0].length representing the coefficient values
+ */ 
 function generateTheta(X, y)
-{
-	// FORMULA: theta = pinv(X'*X)*X'*y;
-	
+{	
 	// Get the transpose of X
 	Xt = X.transpose();
 	
@@ -80,7 +103,8 @@ function generateTheta(X, y)
 	var Xinv = Xmain.inverse();
 
 	// Get the transpose of X' times y
-	var Atd = X.x(y.transpose());
+	//var Atd = X.x(y.transpose());  MAYBE WRONG ORIENTATION
+	var Atd = X.x(y);
 	
 	// Theta is the result of the multiplication of both 
 	var theta = Xinv.x(Atd);
@@ -88,57 +112,50 @@ function generateTheta(X, y)
 	return theta;
 }
 
-// Generates an input matrix with the appropriate number of coefficients
-function generateInputMatrix(x)
+/** Generates a linear regression input matrix by taking the input vector and assembling a matrix where each row is that
+ * input vector raised to a given power. For example, given the power = 3 the output O will be of the form:
+ * O[0] = x^0  i.e. all ones
+ * O[1] = x^1  i.e. the same as x
+ * O[2] = x^2  i.e. all elements of x squared
+ * O[3] = x^3  i.e. all elements of x cubed
+ * 
+ * @param x An input array representing a vector of values
+ * @param power The maximum power of the series to create
+ * @returns An array of size [x,power+1] 
+ */
+function generateInputMatrix(x, power)
 {
 	var ones = new Array();
-	for(i=0;i<x.cols();i++)
+	for(i=0;i<x.length;i++)
 	{
 		ones[i] = 1;
 	}
+		
+	// build the basic input in the form of a 2nd degree polynomial
+	var matrixArray = new Array();
+	matrixArray[0] = ones;
+	matrixArray[1] = x;
+	var xMatrix = $M(x);
+	matrixArray[2] = matrixPower(xMatrix,2).transpose().elements[0];
 	
-	var M2 = $M( [ones,								// constants
-	              x.elements[0], 					// x values
-			      matrixPower(x,2).elements[0],		// x^2 values
-			      //matrixPower(x,3).elements[0]//,		// x^3 values
-			      //matrixPower(x,4).elements[0]		// x^4 values
-			 ]);
+	// add all degrees beyond 2 that are required
+	for(i=3;i<=power;i++)
+	{
+		matrixArray[i] = matrixPower(xMatrix,i).transpose().elements[0];	// x^n values
+	}
+	
+	var M2 = $M(matrixArray);
 	
 	return M2;
 	
 }
 
-// Decomposes a data series into a series of vectors
-function vectorize(dataSeries)
-{
-	var xArray = new Array();
-	var yArray = new Array();
-	
-	$.each(dataSeries, function(i, item) {
-		xArray[i] = i; // use the ordinal value of x instead of the actual value
-		yArray[i] = item.y;
-	});
-
-	var vectors = new Array();
-	vectors["x"] = Matrix.create([xArray]);
-	vectors["y"] = Matrix.create([yArray]);
-	
-	return vectors;
-}
-
-// Decomposes a vector data series into an ordinal sequence
-function ordinalize(dataSeries)
-{
-	var vectorArray = new Array();
-	
-	$.each(dataSeries, function(i, item) {
-		vectorArray[i] = i; // use the ordinal value of x instead of the actual value
-	});
-
-	return Matrix.create([vectorArray]);
-}
-
-// Raises the given matrix to the given power 
+/** Raises all elements in the given matrix M to the given power n, such as M[i][j]^n
+ * 
+ * @param matrix A Matrix object
+ * @param power The power that all elements of the input matrix should be raised 
+ * @returns A Matrix with all elements having been raised to the specified power
+ */
 function matrixPower(matrix, power)
 {
 	
@@ -150,14 +167,36 @@ function matrixPower(matrix, power)
 		{
 			var value = matrix.e(row, col);
 			
-			for(i=0;i<power;i++)
-			{
-				value *= value;
-			}
+			value = Math.pow(value, power);
 			
 			result.elements[row-1][col-1] = value;
 		}
 	}
 	
 	return result;
+}
+
+
+/** 
+ * Decomposes a vector data series of the form data[series][n] and transforms it into an ordinal sequence of the form data[ordinal][n]
+ * 
+ * @param dataSeries A two dimensional array of size 2xN containing the sub arrays data['x'][N] and data['y'][N]
+ * @returns {___vectorArray0} A two dimensional array of size 3xN containing the sub arrays data['label'][N] data['x'][N] 
+ * 			and data['y'][N] where label is the value of the input series 'x' and 'x' is the ordinal value of the entry. 
+ */
+function ordinalize(dataSeries)
+{
+	// Build the new array
+	var vectorArray = new Array();
+	vectorArray['x'] = new Array();		// this will be the ordinal 
+	vectorArray['y'] = new Array();		// this will be the 'y' value of the input
+	vectorArray['label'] = new Array(); // this will be the 'x' value of the input
+	
+	$.each(dataSeries['x'], function(i, item) {
+		vectorArray['label'][i] = dataSeries['x'][i];
+		vectorArray['x'][i] = i; 		// use the ordinal value of x instead of the actual value
+		vectorArray['y'][i] = dataSeries['y'][i];
+	});
+	
+	return vectorArray;
 }
