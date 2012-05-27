@@ -39,9 +39,6 @@ function buildModel(data, degree)
 	// if the degree is not provided, use the default
 	if(!degree) degree = DEFAULT_POLYNOMIAL_DEGREE;
 	
-	// take data series format {[x,y]} and turn it into vectors
-	//var vectors = vectorize(data);
-	
 	var X = generateInputMatrix(data["x"], degree);
 	var y = $M(data["y"]);
 	
@@ -103,7 +100,6 @@ function generateTheta(X, y)
 	var Xinv = Xmain.inverse();
 
 	// Get the transpose of X' times y
-	//var Atd = X.x(y.transpose());  MAYBE WRONG ORIENTATION
 	var Atd = X.x(y);
 	
 	// Theta is the result of the multiplication of both 
