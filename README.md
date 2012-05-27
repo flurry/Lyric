@@ -3,10 +3,15 @@ Lyric
 
 Linear Regression library in pure Javascript
 
+Lyric can help you analyze any set of x,y series data by building a model that can be used to:
+1. Create trendlines on charts
+2. Predict future values based on an existing set of data
+
+Typical applications would include charting libraries and machine learning applications. 
+
 Lyric depends on the great Javascript Matrix library Sylvester by James Coglan available here: 
 https://github.com/jcoglan/sylvester
-
-And the JQuery library available here: http://jquery.com/
+and the JQuery library available here: http://jquery.com/
 
 Usage
 =====
@@ -59,6 +64,7 @@ For example, to model using a 4-th degree polynomial you would modify the above 
 Timeseries
 =====
 For timeseries data using regular intervals, it is typically more efficient to use the ordinality as the explanatory value than the timestamp. For example, given the following data series:
+
 	var input = new Array();
 	input['x'][0] = '2012-03-01';		input['y'][0] = 0.5;
 	input['x'][1] = '2012-03-02';		input['y'][1] = 1.6;	
@@ -71,6 +77,7 @@ You can turn the dates in the input[0] series into timestamps for use in modelli
 	var ordinalInput = ordinalize(input);
 	
 The resulting ordinalInput will be equivalent to having created the following input:
+
 	var input = new Array();
 	input['label'][0] = '2012-03-01';		input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['label'][1] = '2012-03-01';		input['x'][1] = 2;		input['y'][1] = 1.6;	
@@ -96,6 +103,6 @@ Copyright 2012 Flurry, Inc. (http://flurry.com)
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
