@@ -70,9 +70,9 @@ function applyModel(data, theta, degree)
 	for(i=0; i<data['x'].length; i++)
 	{
 		if(data['label']) // if there are labels use them
-			dataSeries[i] = {x : data["label"][i], y : y.e(1,i)};
+			dataSeries[i] = {x : data["label"][i], y : y.e(1,i+1)}; // Matrices are not zero indexed
 		else			  // otherwise the x values are fine
-			dataSeries[i] = {x : data["x"][i], y : y.e(1,i)};
+			dataSeries[i] = {x : data["x"][i], y : y.e(1,i+1)};
 	}
 	
 	return dataSeries;
