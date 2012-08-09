@@ -19,12 +19,12 @@ Usage
 Download the lyric.js, jquery-X.X.X.js and sylvester.js files and include them in your web application. 
 
 Include both the lyric.js and the sylvester.js files as shown below:  
-	<script type="text/javascript" src="js/jquery-X.X.X.js"></script>
-	<script type="text/javascript" src="js/sylvester.js"></script>
-	<script type="text/javascript" src="js/lyric.js"></script>
+&lt;script type="text/javascript" src="js/jquery-X.X.X.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="js/sylvester.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="js/lyric.js"&gt;&lt;/script&gt;
 	
 First, make sure your data is represented in the form of a 2xN Array comprised of elements with an 'x' and 'y' value. The x value should be the explanatory and the y the dependent variables.
-
+<!-- language: lang-js -->
 	var input = new Array();
 	input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['x'][1] = 2;		input['y'][1] = 1.6;	
@@ -33,15 +33,15 @@ First, make sure your data is represented in the form of a 2xN Array comprised o
 	input['x'][4] = 5;		input['y'][4] = 10.1;
 	
 Then you need to have Lyric build the model for you from your data:
-
+<!-- language: lang-js -->
 	var model = buildModel(input);
 
 Now that you have your model, you will likely want to apply it to a set of inputs. The newInput should be a 1xN array containing only the explanatory variable values you would like to calculate the dependent values. This will result in a new 2xN array which will include the resulting series. 
-
+<!-- language: lang-js -->
 	var data = applyModel(model, estimationInput);
 
 The following is a complete example which, given some values for the explanatory values 1 through 5, estimates the values of 6 through 8:
-
+<!-- language: lang-js -->
 	var input = new Array();
 	input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['x'][1] = 2;		input['y'][1] = 1.6;	
@@ -58,13 +58,13 @@ The following is a complete example which, given some values for the explanatory
 	
 By default Lyric will attempt to use a 2nd degree polynomial to model the data. If you would like to use a higher order polynomial for the model, just pass in the degree you would like to use in the buildModel() and applyModel() functions. 
 For example, to model using a 4-th degree polynomial you would modify the above example as follows:
-
+<!-- language: lang-js -->
 	var estimateData = applyModel(estimationInput, buildModel(data, 4), 4);
 	
 Timeseries
 =====
 For timeseries data using regular intervals, it is typically more efficient to use the ordinality as the explanatory value than the timestamp. For example, given the following data series:
-
+<!-- language: lang-js -->
 	var input = new Array();
 	input['x'][0] = '2012-03-01';		input['y'][0] = 0.5;
 	input['x'][1] = '2012-03-02';		input['y'][1] = 1.6;	
@@ -73,11 +73,11 @@ For timeseries data using regular intervals, it is typically more efficient to u
 	input['x'][4] = '2012-03-05';		input['y'][4] = 10.1;
 	
 You can turn the dates in the input[0] series into timestamps for use in modelling, but since each data point represents a single day the easier and simpler calculation is to ignore the particular days and use the ordinality. Lyric provides a convenience function for manipulating this kind of data called ordinalize() which is used as shown below:
-
+<!-- language: lang-js -->
 	var ordinalInput = ordinalize(input);
 	
 The resulting ordinalInput will be equivalent to having created the following input:
-
+<!-- language: lang-js -->
 	var input = new Array();
 	input['label'][0] = '2012-03-01';		input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['label'][1] = '2012-03-01';		input['x'][1] = 2;		input['y'][1] = 1.6;	
