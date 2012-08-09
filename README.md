@@ -19,8 +19,8 @@ Usage
 Download the lyric.js, jquery-X.X.X.js and sylvester.js files and include them in your web application. 
 
 Include both the lyric.js and the sylvester.js files as shown below:  
-&lt;script type="text/javascript" src="js/jquery-X.X.X.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="js/sylvester.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="js/jquery-X.X.X.js"&gt;&lt;/script&gt;<br/>
+&lt;script type="text/javascript" src="js/sylvester.js"&gt;&lt;/script&gt;<br/>
 &lt;script type="text/javascript" src="js/lyric.js"&gt;&lt;/script&gt;
 	
 First, make sure your data is represented in the form of a 2xN Array comprised of elements with an 'x' and 'y' value. The x value should be the explanatory and the y the dependent variables.
