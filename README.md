@@ -44,6 +44,8 @@ Now that you have your model, you will likely want to apply it to a set of input
 The following is a complete example which, given some values for the explanatory values 1 through 5, estimates the values of 6 through 8:
 <!-- language: lang-js -->
 	var input = new Array();
+	input['x'] = new Array();
+	input['y'] = new Array();
 	input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['x'][1] = 2;		input['y'][1] = 1.6;	
 	input['x'][2] = 3;		input['y'][2] = 4.5;
@@ -51,16 +53,24 @@ The following is a complete example which, given some values for the explanatory
 	input['x'][4] = 5;		input['y'][4] = 10.1;
 	
 	var estimationInput = new Array();
+	estimationInput['x'] = new Array();
 	estimationInput['x'][0] = 6;
 	estimationInput['x'][1] = 7;
 	estimationInput['x'][2] = 8;
 
-	var estimateData = applyModel(estimationInput, buildModel(data));
+	var estimateData = applyModel(estimationInput, buildModel(input));
 	
+	/** 
+	 * Resulting data: 
+	 * estimateData['x'][0] = 6; 	estimateData['y'][0] = 13.4;
+	 * estimateData['x'][1] = 7; 	estimateData['y'][0] = 15.7;
+	 * estimateData['x'][2] = 8; 	estimateData['y'][0] = 18.1;
+	 */	
+
 By default Lyric will attempt to use a 2nd degree polynomial to model the data. If you would like to use a higher order polynomial for the model, just pass in the degree you would like to use in the buildModel() and applyModel() functions. 
 For example, to model using a 4-th degree polynomial you would modify the above example as follows:
 <!-- language: lang-js -->
-	var estimateData = applyModel(estimationInput, buildModel(data, 4), 4);
+	var estimateData = applyModel(estimationInput, buildModel(input, 4), 4);
 	
 Timeseries
 =====
