@@ -27,6 +27,8 @@ Include both the lyric.js and the sylvester.js files as shown below:
 First, make sure your data is represented in the form of a 2xN Array comprised of elements with an 'x' and 'y' value. The x value should be the explanatory and the y the dependent variables.
 <!-- language: lang-js -->
 	var input = new Array();
+	input['x'] = new Array();
+	input['y'] = new Array();
 	input['x'][0] = 1;		input['y'][0] = 0.5;
 	input['x'][1] = 2;		input['y'][1] = 1.6;	
 	input['x'][2] = 3;		input['y'][2] = 4.5;
